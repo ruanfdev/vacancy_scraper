@@ -21,13 +21,30 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
         run: npm install puppeteer fs 
-      - name: Install browsers
-        run: sudo npx puppeteer install chrome   
-      - run: node vacancy_scraper.js
+
+      # Manually download and setup Chromium
+      - name: Download and install Chromium
+        env:
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true # Skip Puppeteer's automatic download
+        run: |
+          # Get the latest stable Chromium version number
+          CHROMIUM_VERSION=$(curl -s https://omahaproxy.appspot.com/ | grep -Po '(?<=chromium_rel":")[^"]*')
+          echo "Installing Chromium version: $CHROMIUM_VERSION"
+
+          # Install Chromium using apt-get
+          sudo apt-get update
+          sudo apt-get install -y chromium-$CHROMIUM_VERSION
+
+      - name: Run the scraper
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser # Set the path to Chromium
+        run: node vacancy_scraper.js
+
       - uses: actions/upload-artifact@v4
         with:
           name: vacancies
           path: vacancies.csv
+
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
