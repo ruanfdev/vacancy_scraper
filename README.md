@@ -1,2 +1,2 @@
 # vacancy_scraper
-Vacancy Scraper
+Scrape External and Internal vacancies from NWK and combine them
