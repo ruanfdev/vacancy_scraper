@@ -1,10 +1,9 @@
-# .github/workflows/vacancy_scraper.yml
 name: Vacancy Scraper
 
 on:
   schedule:
-    - cron: '0 8 * * *'  
-  workflow_dispatch:     
+    - cron: '0 8 * * *'  # Run daily at 8:00 AM (Adjust as needed)
+  workflow_dispatch:     # Keep workflow_dispatch for manual triggering
 
 jobs:
   scrape:
@@ -21,36 +20,35 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
-        run: npm install puppeteer fs 
+        run: npm install puppeteer fs
 
       # Manually download and setup Chromium
       - name: Download and install Chromium
         env:
           PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true # Skip Puppeteer's automatic download
         run: |
-          # Get the latest stable Chromium version number (more reliable)
-          CHROMIUM_VERSION=$(wget -q -O - https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb | grep -Po '(?<=Version: )\d+\.\d+\.\d+\.\d+')
-          echo "Installing Chromium version: $CHROMIUM_VERSION"
+          # Ensure apt-get is up-to-date and install necessary packages
+          sudo apt-get update && sudo apt-get install -y wget gnupg2
 
-          # Install Chromium dependencies
+          # Add Google's signing key for package verification
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+
+          # Add Google Chrome to the package sources
+          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+
+          # Update the package list again
           sudo apt-get update
-          sudo apt-get install -y libgbm-dev libasound2 libnss3 libxi6 libatk1.0-0 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation fonts-noto-cjk libappindicator1 libxss1 lsb-release xdg-utils wget
 
-          # Download the Chromium .deb package
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          # Install the latest stable Chromium
+          sudo apt-get install -y google-chrome-stable
 
-          # Install the Chromium .deb package
-          sudo dpkg -i google-chrome-stable_current_amd64.deb
+          # Verify Chromium installation
+          google-chrome --version || (echo "Chromium installation failed" && exit 1)
 
-          # Check for installation errors
-          if [ $? -ne 0 ]; then
-            echo "Error installing Chromium. Trying to fix dependencies..."
-            sudo apt-get install -f -y
-            sudo dpkg -i google-chrome-stable_current_amd64.deb
-          fi
+      # Run the scraper
       - name: Run the scraper
         env:
-          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser # Set the path to Chromium
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome # Set the path to Chromium
         run: node vacancy_scraper.mjs
 
       - uses: actions/upload-artifact@v4
