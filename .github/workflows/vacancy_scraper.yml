@@ -20,7 +20,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
-        run: npm install puppeteer fs
+        run: npm install puppeteer fs 
+      - name: Install browsers
+        run: npx puppeteer install chrome   
       - run: node vacancy_scraper.js
       - uses: actions/upload-artifact@v4
         with:
@@ -31,4 +33,3 @@ jobs:
         with:
           name: error-screenshot
           path: error_screenshot.png
-
