@@ -6,7 +6,7 @@ async function scrapeVacancies(url) {
   const page = await browser.newPage();
 
   try {
-      await page.goto(url, { waitUntil: 'networkidle0' });
+      await page.goto(url, { waitUntil: 'networkidle0', timeout: 10000 });
       await page.waitForSelector('table:not(.table_title) tbody tr', { timeout: 5000 });
 
       const data = await page.evaluate(() => {
@@ -32,10 +32,11 @@ async function scrapeVacancies(url) {
 
       console.log('Scraped data:', data);
       return data;
-  } catch (error) {
+    } catch (error) {
       console.error('Error scraping data:', error);
+      await page.screenshot({ path: 'error_screenshot.png' });  // Take a screenshot for debugging
       throw error; 
-  } finally {
+    } finally {
       await browser.close();
   }
 }
