@@ -30,7 +30,6 @@ async function scrapeVacancies(url) {
           });
       });
 
-      console.log('Scraped data:', data);
       return data;
     } catch (error) {
       console.error('Error scraping data:', error);
