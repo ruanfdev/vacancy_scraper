@@ -21,7 +21,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
         run: npm install puppeteer fs
-      - run: node vacancy_scraper.mjs
+      - run: node vacancy_scraper.js
       - uses: actions/upload-artifact@v4
         with:
           name: vacancies
