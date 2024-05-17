@@ -3,7 +3,7 @@ name: Vacancy Scraper
 on:
   schedule:
     - cron: '0 8 * * *'  # Run daily at 8:00 AM (Adjust as needed)
-  workflow_dispatch:     # For manual triggering
+  workflow_dispatch:     # Keep workflow_dispatch for manual triggering
 
 jobs:
   scrape:
@@ -20,14 +20,15 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
-        run: npm install puppeteer@latest fs
+        run: npm install puppeteer fs
       - run: node vacancy_scraper.js
       - uses: actions/upload-artifact@v4
         with:
           name: vacancies
           path: vacancies.csv
       - uses: actions/upload-artifact@v4
-        if: failure() # Only upload on failure
+        if: failure()
         with:
           name: error-screenshot
           path: error_screenshot.png
+
