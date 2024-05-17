@@ -3,7 +3,7 @@ name: Vacancy Scraper
 on:
   schedule:
     - cron: '0 8 * * *'  # Run daily at 8:00 AM (Adjust as needed)
-  workflow_dispatch:     # Allow manual triggering
+  workflow_dispatch:     # For manual triggering
 
 jobs:
   scrape:
@@ -19,9 +19,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm install axios cheerio json2csv
+      - name: Install dependencies
+        run: npm install puppeteer
       - run: node vacancy_scraper.js
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4  
         with:
           name: vacancies
           path: vacancies.csv
